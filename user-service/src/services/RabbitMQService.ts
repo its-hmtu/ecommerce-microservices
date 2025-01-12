@@ -36,6 +36,7 @@ class RabbitMQService {
         );
 
         this.channel.ack(msg);
+        console.log("User details sent to the response queue");
       }
     });
   }
