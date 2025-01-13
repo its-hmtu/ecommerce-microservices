@@ -15,7 +15,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(userRouter);
 app.use(errorConverter);
 app.use(errorHandler);
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 
 connectDb();
 
