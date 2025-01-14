@@ -5,6 +5,7 @@ export interface ICart extends Document {
   items: {
     productId: string;
     quantity: number;
+    price: number;
   }[];
   createdAt: Date;
   updatedAt: Date;
@@ -18,12 +19,13 @@ const CartSchema: Schema = new Schema({
   items: [
     {
       productId: {
-        type: String,
-        required: [true, "Product ID must be provided"],
+        type: String
       },
       quantity: {
-        type: Number,
-        required: [true, "Quantity must be provided"],
+        type: Number
+      },
+      price: {
+        type: Number
       },
     },
   ],

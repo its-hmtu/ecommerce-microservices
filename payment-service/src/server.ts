@@ -1,10 +1,9 @@
 import express, {Express, RequestHandler} from 'express';
 import {Server} from "http";
-import userRouter from './routes';
+import paymentRouter from './routes';
 import { errorConverter, errorHandler } from './middlewares';
 import { connectDb } from './database';
 import config from './config';
-import { redisCacheService } from './services/RedisCacheService';
 import { rabbitMQService } from './services/RabbitMQService';
 import morgan from 'morgan';
 import winston from 'winston';
@@ -20,7 +19,7 @@ const logger = winston.createLogger({
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-app.use(userRouter);
+app.use(paymentRouter);
 app.use(errorConverter);
 app.use(errorHandler);
 // app.use(morgan('dev'));
@@ -43,16 +42,6 @@ const initializeRabbitMQ = async () => {
 
 initializeRabbitMQ();
 
-const initializeRedis = async () => {
-  try {
-    await redisCacheService.init();
-  } catch (e) {
-    console.error("Error initializing Redis client: ", e);
-  }
-}
-
-initializeRedis();
-
 const exitHandler = () => {
   if (server) {
     server.close(() => {
@@ -71,3 +60,7 @@ const unexpectedErrorHandler = (error: Error) => {
 
 process.on("uncaughtException", unexpectedErrorHandler);
 process.on("unhandledRejection", unexpectedErrorHandler);
+
+app.get('/', (req, res) => {
+  res.send('Hello World');
+})

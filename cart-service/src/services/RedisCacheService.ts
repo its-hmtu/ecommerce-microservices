@@ -34,7 +34,7 @@ class RedisCacheService {
     return data ? JSON.parse(data) : null
   }
 
-  async clearCache(key: string) {
+  async clearCache(key?: string) {
     await this.redisClient.del(key)
   }
 }

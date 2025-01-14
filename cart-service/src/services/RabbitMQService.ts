@@ -5,6 +5,8 @@ import { ApiError } from "../utils";
 
 class RabbitMQService {
   private cartQueue = "CART_UPDATED";
+  private cartGetRequestQueue = "CART_GET_REQUEST";
+  private cartGetResponseQueue = "CART_GET_RESPONSE";
   private connection!: Connection;
   private channel!: Channel;
 
@@ -16,7 +18,9 @@ class RabbitMQService {
     this.connection = await amqp.connect(config.msgBrokerUri!);
     this.channel = await this.connection.createChannel();
     await this.channel.assertQueue(this.cartQueue, { durable: true });
-    // this.listenForRequests();
+    await this.channel.assertQueue(this.cartGetRequestQueue, { durable: true });
+    await this.channel.assertQueue(this.cartGetResponseQueue, { durable: true });
+    this.listenForRequests();
   }
 
   async sendCartUpdated(cart: ICart) {
@@ -25,18 +29,20 @@ class RabbitMQService {
     console.log("Cart updated message sent", message);
   }
 
-  // async listenForRequests() {
-  //   this.channel.consume(this.cartQueue, async (msg) => {
-  //     if (msg && msg.content) {
-  //       const cartData = JSON.parse(msg.content.toString());
-  //       console.log("Cart updated message received", cartData);
+  async listenForRequests() {
+    this.channel.consume(this.cartGetRequestQueue, async (msg) => {
+      if (msg && msg.content) {
+        const { userId } = JSON.parse(msg.content.toString());
+        console.log("Received request for cart", userId);
+        const cart = await Cart.findOne({ userId });
+        const message = JSON.stringify(cart);
+        this.channel.sendToQueue(this.cartGetResponseQueue, Buffer.from(message));
 
-  //       // await Product.findByIdAndUpdate(productData._id, productData);
-
-  //       this.channel.ack(msg)
-  //     }
-  //   }) 
-  // }
+        console.log("Cart sent", message);
+        this.channel.ack(msg);
+      }
+    }) 
+  }
 }
 
 export const rabbitMQService = new RabbitMQService();

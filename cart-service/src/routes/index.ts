@@ -4,7 +4,7 @@ import CartController from "../controllers/CartController"
 
 const cartRouter = Router();
 
-cartRouter.get('/cart', authMiddleware, CartController.getCart)
-cartRouter.post('/cart', authMiddleware, CartController.updateCart)
+cartRouter.get('/', CartController.getCart)
+cartRouter.post('/cart', CartController.updateCart)
 
 export default cartRouter;

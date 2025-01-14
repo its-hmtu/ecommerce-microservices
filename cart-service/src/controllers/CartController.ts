@@ -6,31 +6,22 @@ import config from '../config';
 // import { rabbitMQService } from '../services/RabbitMQService';
 import { redisCacheService } from '../services/RedisCacheService';
 
-const jwtSecret = config.JWT_SECRET as string;
-const COOKIE_EXP = 90;
-const experation = new Date(Date.now() + COOKIE_EXP * 24 * 60 * 60 * 1000);
-const cookieOptions = {
-  expires: experation,
-  secure: false,
-  httpOnly: true,
-}
-
 const getCart = async (req: Request, res: Response) => {
-  const userId = req.params.userId;
+  const {userId} = req.query;
 
   try {
-    const cacheCart = await redisCacheService.getCache(userId);
+    const cacheCart = await redisCacheService.getCache(userId as string);
     if (cacheCart) {
       res.status(200).json(cacheCart);
-
+      return;
     }
 
-    const cart = await Cart.findOne({userId})
+    const cart = await Cart.findById(userId)
     if (!cart) {
       throw new ApiError(404, "Cart not found");
     }
 
-    await redisCacheService.setCache(userId, cart);
+    await redisCacheService.setCache(userId as string, cart);
     res.status(200).json(cart);
   } catch (e: any) {
     res.status(500).json({message: e.message});
@@ -38,8 +29,8 @@ const getCart = async (req: Request, res: Response) => {
 }
 
 const updateCart = async (req: Request, res: Response) => {
-  const userId = req.params.userId;
-  const { productId, quantity } = req.body;
+  const {userId} = req.query;
+  const { productId, quantity, price } = req.body;
 
   try {
     let cart = await Cart.findOne({
@@ -59,13 +50,14 @@ const updateCart = async (req: Request, res: Response) => {
     } else {
       cart.items.push({
         productId,
-        quantity
+        quantity,
+        price
       })
     }
 
     await cart.save();
 
-    await redisCacheService.clearCache(userId);
+    await redisCacheService.clearCache(userId as string) ;
 
     res.status(200).json(cart);
   } catch (e: any) {

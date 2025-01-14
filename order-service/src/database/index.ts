@@ -1,4 +1,4 @@
-import Order, { IOrder } from "../models/OrderModel";
+import Order, { IOrder, OrderStatus } from "../models/OrderModel";
 import { connectDb } from "./connection";
 
-export {Order, IOrder, connectDb};
+export {Order, IOrder, OrderStatus, connectDb};
