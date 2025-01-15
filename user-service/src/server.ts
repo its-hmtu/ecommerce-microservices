@@ -6,6 +6,8 @@ import { connectDb } from './database';
 import config from './config';
 import { rabbitMQService } from './services/RabbitMQService';
 import morgan from 'morgan';
+import { registerService } from './config/consulClient';
+import { parse } from 'path';
 
 const app:Express = express();
 let server:Server;
@@ -18,6 +20,12 @@ app.use(errorHandler);
 // app.use(morgan('dev'));
 
 connectDb();
+
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+})
+
+registerService('user-service', Number(config.PORT));
 
 server = app.listen(config.PORT, () => {
   console.log(`Server is running on port ${config.PORT}`);
@@ -52,7 +60,3 @@ const unexpectedErrorHandler = (error: Error) => {
 
 process.on("uncaughtException", unexpectedErrorHandler);
 process.on("unhandledRejection", unexpectedErrorHandler);
-
-app.get('/', (req, res) => {
-  res.send('Hello World');
-})

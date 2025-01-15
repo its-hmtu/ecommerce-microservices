@@ -4,6 +4,8 @@ export interface ICart extends Document {
   userId: string;
   items: {
     productId: string;
+    name: string;
+    image: string;
     quantity: number;
     price: number;
   }[];
@@ -19,6 +21,12 @@ const CartSchema: Schema = new Schema({
   items: [
     {
       productId: {
+        type: String
+      },
+      name: {
+        type: String
+      },
+      image: {
         type: String
       },
       quantity: {

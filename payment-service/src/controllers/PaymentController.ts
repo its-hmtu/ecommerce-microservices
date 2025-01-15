@@ -25,7 +25,7 @@ const createPayment = async (req: Request, res: Response) => {
       amount,
     });
 
-    if (paymentResult) {
+    if (paymentResult?.success === true) {
       payment.status = PaymentStatus.SUCCESS;
       await payment.save();
 
@@ -35,6 +35,7 @@ const createPayment = async (req: Request, res: Response) => {
         Buffer.from(
           JSON.stringify({
             orderId,
+            userId,
             status: payment.status,
             amount: payment.amount,
           })
@@ -48,7 +49,7 @@ const createPayment = async (req: Request, res: Response) => {
       };
   
       channel.sendToQueue("EMAIL_QUEUE", Buffer.from(JSON.stringify(emailData)));
-      res.status(201).json({ message: "Payment created" });
+      res.status(201).json({ message: paymentResult.message });
     } else {
       payment.status = PaymentStatus.FAILED;
       await payment.save();

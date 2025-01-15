@@ -3,6 +3,7 @@ import {Server} from "http";
 import { errorConverter, errorHandler } from './middlewares';
 import config from './config';
 import { rabbitMQService } from './services/RabbitMQService';
+import emailQueue from './services/EmailQueue';
 
 const app:Express = express();
 let server:Server;
@@ -26,7 +27,18 @@ const initializeRabbitMQ = async () => {
   }
 }
 
+const initializeBullQueue = async () => {
+  try {
+    await emailQueue.isReady();
+    console.log("Bull queue initialized and ready to accept jobs");
+
+  } catch (e) {
+    console.error("Error initializing Bull queue: ", e);
+  }
+}
+
 initializeRabbitMQ();
+initializeBullQueue();
 
 const exitHandler = () => {
   if (server) {

@@ -5,6 +5,6 @@ import OrderController from "../controllers/OrderController";
 const orderRouter = Router();
 
 orderRouter.post('/', authMiddleware, OrderController.createOrder)
-orderRouter.get('/', authMiddleware, OrderController.getOrders)
+orderRouter.get('/:userId', OrderController.getOrders)
 
 export default orderRouter;

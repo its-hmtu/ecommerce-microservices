@@ -18,12 +18,14 @@ const logger = winston.createLogger({
   ]
 })
 
+const morganLogger = morgan('dev');
+
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(userRouter);
 app.use(errorConverter);
 app.use(errorHandler);
-// app.use(morgan('dev'));
+app.use(morganLogger);
 
 connectDb();
 

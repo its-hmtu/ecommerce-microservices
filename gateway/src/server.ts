@@ -1,48 +1,56 @@
-import express, {Request, Response, NextFunction} from "express";
-import {createProxyMiddleware} from "http-proxy-middleware"
-import {consulClient} from "./consulClient"
+import express from 'express';
+import proxy from 'express-http-proxy';
+import morgan from 'morgan';
+import cors from 'cors';
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const logger = morgan('dev');
 
-interface RequestWithProxyTarget extends Request {
-  proxyTarget?: string;
-}
+app.use(cors(
+  {
+    origin: 'http://localhost:8000',
+    credentials: true,
+  }
+));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(logger);
 
-const serviceDiscoveryMiddleware = async (req: RequestWithProxyTarget, res: Response, next: NextFunction) => {
-  const serviceName = req.params.service;
-  try {
-    const services = await consulClient.getService(serviceName);
+const auth = proxy('http://localhost:8081')
+const products = proxy('http://localhost:8082')
+const cart = proxy('http://localhost:8083')
+const orders = proxy('http://localhost:8085')
+const payment = proxy('http://localhost:8086')
 
-    if (services.length === 0) {
-      res.status(503).json({message: `Service ${serviceName} unavailable`});
-      return;
-    }
+app.use('/api/auth', auth);
+app.use('/api/products', products);
+app.use('/api/cart', cart);
+app.use('/api/orders', orders);
+app.use('/api/payment', payment);
 
-    const {address, port } = services[Math.floor(Math.random() * services.length)];
-    req.proxyTarget = `http://${address}:${port}`;
-    next();
-  } catch (e: any) {
-    console.error("Error getting service: ", e);
-    res.status(500).json({message: "Error getting service"});
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+const server = app.listen(8080, () => {
+  console.log('Gateway is running on port 8080');
+});
+
+const exitHandler = () => {
+  if (server) {
+    server.close(() => {
+      console.info('Server closed');
+      process.exit(1);
+    })
+  } else {
+    process.exit(1);
   }
 }
 
-app.use("/api/:service/*", serviceDiscoveryMiddleware, (req: RequestWithProxyTarget, res: Response, next: NextFunction) => {
-  const proxy = createProxyMiddleware({
-    target: req.proxyTarget,
-    changeOrigin: true,
-    pathRewrite: {
-      "^/api/:service": ""
-    }
-  });
-  proxy(req, res, next);
-})
+const unexpectedErrorHandler = (error: unknown) => {
+  console.error(error);
+  exitHandler();
+}
 
-app.get("/health", (req: Request, res: Response) => {
-  res.status(200).json({message: "Gateway is healthy"})
-});
-
-app.listen(PORT, () => {
-  console.log(`Gateway listening on port ${PORT}`);
-})
+process.on('uncaughtException', unexpectedErrorHandler);
+process.on('unhandledRejection', unexpectedErrorHandler);
