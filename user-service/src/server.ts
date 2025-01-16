@@ -6,26 +6,19 @@ import { connectDb } from './database';
 import config from './config';
 import { rabbitMQService } from './services/RabbitMQService';
 import morgan from 'morgan';
-import { registerService } from './config/consulClient';
-import { parse } from 'path';
 
 const app:Express = express();
 let server:Server;
+const logger = morgan('dev');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-app.use(userRouter);
+app.use(logger);
 app.use(errorConverter);
 app.use(errorHandler);
-// app.use(morgan('dev'));
+app.use(userRouter);
 
 connectDb();
-
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
-})
-
-registerService('user-service', Number(config.PORT));
 
 server = app.listen(config.PORT, () => {
   console.log(`Server is running on port ${config.PORT}`);
