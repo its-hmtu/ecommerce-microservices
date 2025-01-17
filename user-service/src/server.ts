@@ -33,7 +33,7 @@ const initializeRabbitMQ = async () => {
   }
 }
 
-initializeRabbitMQ();
+// initializeRabbitMQ();
 
 const exitHandler = () => {
   if (server) {

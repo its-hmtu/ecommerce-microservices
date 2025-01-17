@@ -61,7 +61,7 @@ const register = async (req: Request, res: Response) => {
 const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({email}).select("+password")
+    const user = await User.findOne({email}).select("-password")
     if (!user || !await isPasswordMatch(password, user.password)) {
       throw new ApiError(400, 'Invalid credentials');
     }
