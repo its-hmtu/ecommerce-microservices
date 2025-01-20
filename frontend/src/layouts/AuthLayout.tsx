@@ -8,7 +8,7 @@ function AuthLayout() {
       <Layout.Content className='flex justify-center items-center h-screen'>
         <div className='w-full max-w-md p-4 bg-white rounded-lg shadow-md'>
           <div className='flex justify-left items-center mb-4'>
-            <Logo size='xl' />
+            <Logo size="text-2xl" />
           </div>
           <Outlet />
         </div>

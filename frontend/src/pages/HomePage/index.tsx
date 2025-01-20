@@ -2,7 +2,7 @@ import React from 'react'
 
 function HomePagee() {
   return (
-    <div>HomePagee</div>
+    <div className=''>HomePagee</div>
   )
 }
 
