@@ -2,7 +2,6 @@ import { Button, Checkbox, Form, Input, message } from "antd";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import routes from "../../constants/paths";
-import { login } from "../../api/auth";
 import { toast } from "react-toastify";
 
 type FieldTypes = {
@@ -15,41 +14,7 @@ function LoginPage() {
   const [isLoggingIn, setLoggingIn] = useState(false);
 
   const handleLogin = async (values: FieldTypes) => {
-    try {
-      setLoggingIn(true);
-      await login({
-        email: values.email,
-        password: values.password,
-      })
-        .then((res) => {
-          console.log(res);
-          setLoggingIn(false);
-          if (res.data.status === 200) {
-            // message.success("Login successful");
-            
-          } else {
-            toast.error(res.data.message, {
-              autoClose: false,
-              hideProgressBar: true,
-            });
-          }
-        })
-        .catch((error) => {
-          setLoggingIn(false);
-          // message.error(error.message);
-          toast.error("There was a problem signing you in", {
-            autoClose: false,
-            hideProgressBar: true,
-          });
-        });
-    } catch (error: any) {
-      setLoggingIn(false);
-      // message.error(error.message);
-      toast.error(error.message, {
-        autoClose: false,
-        hideProgressBar: true,
-      });
-    }
+    
   };
 
   return (
@@ -92,7 +57,7 @@ function LoginPage() {
         <Button
           type="primary"
           htmlType="submit"
-          className="w-full rounded-full font-bold"
+          className="w-full rounded-full font-bold "
           loading={isLoggingIn}
         >
           Sign in

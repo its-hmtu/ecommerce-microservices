@@ -9,7 +9,7 @@ function MainLayout() {
       <Layout.Header className='bg-slate-100 shadow-md'>
         <Header isMobile={true}/>
       </Layout.Header>
-      <Layout.Content>
+      <Layout.Content className='max-w-7xl mx-auto'>
         <Outlet />
       </Layout.Content>
     </Layout>

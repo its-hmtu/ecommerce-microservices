@@ -31,16 +31,16 @@ server = app.listen(config.PORT, () => {
   logger.info(`Server is running on port ${config.PORT}`);
 })
 
-const initializeRabbitMQ = async () => {
-  try {
-    await rabbitMQService.init();
-    console.log("RabbitMQ client initialized and listening for messages");
-  } catch (e) {
-    console.error("Error initializing RabbitMQ client: ", e);
-  }
-}
+// const initializeRabbitMQ = async () => {
+//   try {
+//     await rabbitMQService.init();
+//     console.log("RabbitMQ client initialized and listening for messages");
+//   } catch (e) {
+//     console.error("Error initializing RabbitMQ client: ", e);
+//   }
+// }
 
-initializeRabbitMQ();
+// initializeRabbitMQ();
 
 const exitHandler = () => {
   if (server) {

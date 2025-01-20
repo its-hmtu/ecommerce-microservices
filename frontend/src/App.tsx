@@ -2,12 +2,12 @@ import { useState } from 'react'
 import './App.css'
 import { Route, Routes } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
-import routes from './constants/paths'
 import NotFound from './pages/NotFound'
 import AuthLayout from './layouts/AuthLayout'
 import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
 import RegisterPage from './pages/RegisterPage'
+import routes from "./constants/paths"
 
 function App() {
 
