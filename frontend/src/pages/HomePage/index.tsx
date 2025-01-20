@@ -1,26 +1,49 @@
-import { useQuery } from '@tanstack/react-query'
-import React from 'react'
-import productService from '../../features/services/product.service'
+import { useQuery } from "@tanstack/react-query";
+import React from "react";
+import productService from "../../features/services/product.service";
+import { Empty } from "antd";
+import ProductCard from "./components/ProductCard";
 
 function HomePage() {
-  const {data} = useQuery({
-    queryKey: ['user'],
-    queryFn: productService.getProducts
-  })
+  const { data } = useQuery({
+    queryKey: ["user"],
+    queryFn: productService.getProducts,
+  });
+
+  if (data?.length === 0) {
+    <Empty />;
+  }
 
   return (
-    <div className=''>
-      <h1 className='text-2xl font-bold'>Home Page</h1>
-      <div>
-        {data?.map((product: any) => (
-          <div key={product._id}>
-            <h2>{product.name}</h2>
-            <p>{product.description}</p>
-          </div>
-        ))}
+    <div className="">
+      <div className="flex flex-wrap gap-3">
+        {data?.map(
+          ({
+            _id,
+            name,
+            description,
+            price,
+            image,
+          }: {
+            _id: string;
+            name: string;
+            description: string;
+            price: number;
+            image: string;
+          }) => (
+            <ProductCard
+              key={_id}
+              _id={_id}
+              name={name}
+              description={description}
+              price={price}
+              image={image}
+            />
+          )
+        )}
       </div>
     </div>
-  )
+  );
 }
 
-export default HomePage
+export default HomePage;
