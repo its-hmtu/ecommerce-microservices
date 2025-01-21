@@ -16,7 +16,10 @@ createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         <Provider store={store}>
           <App />
-          <ToastContainer />
+          <ToastContainer 
+            hideProgressBar
+            position="bottom-right"
+          />
         </Provider>
       </QueryClientProvider>
     </BrowserRouter>
