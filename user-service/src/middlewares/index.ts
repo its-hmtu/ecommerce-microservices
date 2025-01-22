@@ -1,7 +1,8 @@
-import { ErrorRequestHandler } from "express";
-import { ApiError } from "../utils";
+import { ErrorRequestHandler, Request, Response, NextFunction } from "express";
+import { ApiError, getErrorMessage } from "../utils";
+import config from "../config";
 
-export const errorConverter: ErrorRequestHandler = (err, req, res, next) => {
+export const errorConverter: ErrorRequestHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
   let error = err;
   if (!(error instanceof ApiError)) {
     const statusCode = error.statusCode || (error instanceof Error ? 400 : 500);
@@ -11,24 +12,19 @@ export const errorConverter: ErrorRequestHandler = (err, req, res, next) => {
   next(error);
 }
 
-export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-  let { statusCode, message } = err;
-  if (process.env.NODE_ENV === 'production' && !err.isOperational) {
-    statusCode = 500;
-    message = 'Internal Server Error';
-  }
-  res.locals.errorMessage = message;
-
-  const response = {
-    code: statusCode,
-    message,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+export const errorHandler: ErrorRequestHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+  if (res.headersSent || config.env === "development") {
+    next(err);
+    return
   }
 
-  if (process.env.NODE_ENV === 'development') {
-    console.error(err);
+  if (err instanceof ApiError) {
+    res.status(err.statusCode).json({
+      message: err.message,
+    })
   }
 
-  res.status(statusCode).json(response);
-  next();
+  res.status(err.statusCode || 500).json({
+    message: getErrorMessage(err),
+  })
 }

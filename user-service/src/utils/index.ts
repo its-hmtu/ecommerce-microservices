@@ -21,6 +21,23 @@ class ApiError extends Error {
   }
 }
 
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) {
+    return err.message;
+  }
+
+  if (err && typeof err === "object" && "message" in err) {
+    return String(err["message"]);
+  }
+
+  if (typeof err === "string") {
+    return err;
+  }
+
+  return "An error occurred"; 
+}
+
 const encryptPassword = async (password: string) => {
   const salt = await bcrypt.genSalt(10);
   return await bcrypt.hash(password, salt);
@@ -30,4 +47,4 @@ const isPasswordMatch = async (password: string, userPassword: string) => {
   return await bcrypt.compare(password, userPassword);
 }
 
-export { ApiError, encryptPassword, isPasswordMatch };
+export { ApiError, encryptPassword, isPasswordMatch, getErrorMessage };
