@@ -1,5 +1,7 @@
 import { createTransport, Transport, Transporter } from "nodemailer";
 import config from "../config";
+import fs from "fs";
+import path from "path";
 
 class EmailService {
   private transporter!: Transporter;
@@ -21,8 +23,13 @@ class EmailService {
     });
   }
 
-  async sendEmail(to: string, subject: string, text: string, html: string) {
+  async sendEmail(to: string, subject: string, text: string) {
     try {
+      const templatePath = path.join(__dirname, "../templates/email.template.html");
+      let html = fs.readFileSync(templatePath, "utf-8");
+
+      html = html.replace("{{subject}}", subject).replace("{{content}}", text).replace("{{year}}", new Date().getFullYear().toString());
+
       const info = await this.transporter.sendMail({
         from: config.smtpFrom,
         to,

@@ -2,9 +2,11 @@ import amqp, { Channel, Connection } from "amqplib";
 import config from "../config";
 import { IProduct, Product } from "../database";
 import { ApiError } from "../utils";
+import ProductService from "./ProductService";
 
 class RabbitMQService {
-  private productQueue = "PRODUCT_CREATED";
+  private productDetailsRequest = "PRODUCT_DETAILS_REQUEST";
+  private productDetailsResponse = "PRODUCT_DETAILS_RESPONSE";
   private connection!: Connection;
   private channel!: Channel;
 
@@ -15,28 +17,34 @@ class RabbitMQService {
   async init() {
     this.connection = await amqp.connect(config.msgBrokerUri!);
     this.channel = await this.connection.createChannel();
-    await this.channel.assertQueue(this.productQueue, { durable: true});
+    await this.channel.assertQueue(this.productDetailsRequest, {
+      durable: true,
+    });
+    await this.channel.assertQueue(this.productDetailsResponse, {
+      durable: true,
+    });
 
     this.listenForRequests();
   }
 
-  async sendProductCreated(product: IProduct) {
-    const message = JSON.stringify(product);
-    this.channel.sendToQueue(this.productQueue, Buffer.from(message));
-    console.log("Product created message sent", message);
-  }
-
   async listenForRequests() {
-    this.channel.consume(this.productQueue, async (msg) => {
+    this.channel.consume(this.productDetailsRequest, async (msg) => {
       if (msg && msg.content) {
-        const productData = JSON.parse(msg.content.toString());
-        console.log("Product created message received", productData);
+        const { productId } = JSON.parse(msg.content.toString());
+        const productDetails = await ProductService.getProductById(productId);
 
-        await Product.findByIdAndUpdate(productData._id, productData);
+        this.channel.sendToQueue(
+          this.productDetailsResponse,
+          Buffer.from(JSON.stringify(productDetails)),
+          {
+            correlationId: msg.properties.correlationId,
+          }
+        );
 
-        this.channel.ack(msg)
+        this.channel.ack(msg);
+        console.log("Product details sent to response queue")
       }
-    }) 
+    });
   }
 }
 

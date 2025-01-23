@@ -1,45 +1,36 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { IProduct, Product} from '../database';
 import { ApiError } from "../utils"
 import config from '../config';
 import { rabbitMQService } from '../services/RabbitMQService';
+import ProductService from '../services/ProductService';
 
-const jwtSecret = config.JWT_SECRET as string;
-const COOKIE_EXP = 90;
-const experation = new Date(Date.now() + COOKIE_EXP * 24 * 60 * 60 * 1000);
-const cookieOptions = {
-  expires: experation,
-  secure: false,
-  httpOnly: true,
-}
-
-const getProducts = async (req: Request, res: Response) => {
+const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const products = await Product.find();
+    const products = await ProductService.getProducts();
     res.status(200).json(products);
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(new ApiError(500, error.message))
   }
 }
 
-const getSingleProduct = async (req: Request, res: Response) => {
+const getSingleProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id);
+    const product = await ProductService.getProductById(id)
     if (!product) {
-      throw new ApiError(404, "Product not found");
+      next(new ApiError(404, "Product not found"));
+      return;
     }
 
     res.status(200).json(product);
   } catch (error: any) {
-    res.status(500).json({
-      message: error.message
-    })
+    next(new ApiError(500, error.message as string))
   }
 }
 
-const createProduct = async (req: Request, res: Response) => {
+const createProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { name, price, stock, description, image } = req.body;
 
@@ -51,12 +42,11 @@ const createProduct = async (req: Request, res: Response) => {
       image,
     });
 
-    await newProduct.save();
-    await rabbitMQService.sendProductCreated(newProduct)
+    await ProductService.createProduct(newProduct);
 
     res.status(201).json(newProduct);
   } catch (e: any) {
-    res.status(500).json({ message: e.message });
+    next(new ApiError(500, e.message))
   }
 }
 

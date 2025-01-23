@@ -3,7 +3,8 @@ import config from "../config";
 import { emailService } from "./EmailService";
 
 class RabbitMQService {
-  private emailQueue = "EMAIL_QUEUE";
+  private emailRequest = "EMAIL_REQUEST";
+  private emailResponse = "EMAIL_RESPONSE";
   private connection!: Connection;
   private channel!: Channel;
 
@@ -15,16 +16,17 @@ class RabbitMQService {
     this.connection = await amqp.connect(config.msgBrokerUri!);
     this.channel = await this.connection.createChannel();
 
-    await this.channel.assertQueue(this.emailQueue);
+    await this.channel.assertQueue(this.emailRequest, { durable: true });
+    await this.channel.assertQueue(this.emailResponse, { durable: true });
     this.listenForRequests();
   }
 
   private async listenForRequests() {
-    this.channel.consume(this.emailQueue, async (msg) => {
+    this.channel.consume(this.emailRequest, async (msg) => {
       if (msg && msg.content) {
-        const { to, subject, text, html} = JSON.parse(msg.content.toString());
+        const { to, subject, text } = JSON.parse(msg.content.toString());
         console.log("Received email request: ", { to, subject });
-        await emailService.sendEmail(to, subject, text, html);
+        await emailService.sendEmail(to, subject, text);
 
         this.channel.ack(msg);
       }

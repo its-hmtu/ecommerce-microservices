@@ -15,7 +15,6 @@ let server: Server;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(logger);
-app.use(userRouter);
 
 app.get("/health", (req: Request, res: Response) => {
   res.json({
@@ -23,6 +22,7 @@ app.get("/health", (req: Request, res: Response) => {
     environment: config.env,
   })
 })
+app.use(userRouter);
 
 server = app.listen(config.PORT, () => {
   console.log(`Server is running on port ${config.PORT}`);

@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 import validator, { trim } from "validator";
+import bcrypt from "bcryptjs"
 
 export interface IUser extends Document {
   name: string;
@@ -7,6 +8,7 @@ export interface IUser extends Document {
   password: string;
   createdAt: Date;
   updatedAt: Date;
+  isPasswordMatch: (password: string) => Promise<boolean>;
 }
 
 const UserSchema: Schema = new Schema(
@@ -34,6 +36,13 @@ const UserSchema: Schema = new Schema(
     timestamps: true,
   }
 );
+
+// add check password method
+UserSchema.methods.isPasswordMatch = async function (password: string) {
+  const user = this as IUser;
+  console.log(user.password)
+  return await bcrypt.compare(password, user.password)
+}
 
 const User = mongoose.model<IUser>("User", UserSchema);
 export default User;

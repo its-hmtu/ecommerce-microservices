@@ -20,6 +20,7 @@ class RabbitMQService {
     await this.channel.assertQueue(this.requestQueue);
     await this.channel.assertQueue(this.responseQueue);
 
+
     this.listenForRequests();
   }
 
@@ -30,7 +31,7 @@ class RabbitMQService {
         const userDetails = await getUserDetails(userId);
 
         this.channel.sendToQueue(
-          this.requestQueue,
+          this.responseQueue,
           Buffer.from(JSON.stringify(userDetails)),
           { correlationId: msg.properties.correlationId }
         );

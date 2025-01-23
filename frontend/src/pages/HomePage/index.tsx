@@ -31,6 +31,7 @@ function HomePage() {
   return (
     <div className="w-full">
       <h1 className="text-2xl font-bold mb-4">Hot Products</h1>
+      <a href="http://192.168.100.245/secured">Click me!</a>
       <div className="flex flex-wrap xl:gap-4 sm:gap-3">
         {isPending || !data ? (
           Array.from({ length: 10 }).map((_, index) => (

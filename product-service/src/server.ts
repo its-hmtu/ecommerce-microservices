@@ -1,36 +1,41 @@
-import express, {Express, RequestHandler} from 'express';
+import express, {Express, Request, Response, NextFunction} from 'express';
 import {Server} from "http";
-import userRouter from './routes';
+import router from './routes';
 import { errorConverter, errorHandler } from './middlewares';
 import { connectDb } from './database';
 import config from './config';
 import { rabbitMQService } from './services/RabbitMQService';
 import morgan from 'morgan';
 import winston from 'winston';
+import { registerService } from './config/consulClient';
 require('winston-logstash');
 
 const app:Express = express();
 let server:Server;
-const logger = winston.createLogger({
-  transports: [
-    new winston.transports.Console()
-  ]
-})
+const logger = morgan('dev')
+
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-app.use(userRouter);
-app.use(errorConverter);
-app.use(errorHandler);
-// app.use(morgan('dev'));
+app.use(logger);
+app.get('/health', (req: Request, res: Response) => {
+  res.json({
+    ok: true,
+    environment: config.env
+  })
+})
+app.use(router);
 
-connectDb();
 
 server = app.listen(config.PORT, () => {
-  // console.log(`Server is running on port ${config.PORT}`);
-  logger.info(`Server is running on port ${config.PORT}`);
+  console.log(`Server is running on port ${config.PORT}`);
 })
 
+connectDb();
+registerService('product-service', Number(config.PORT));
+
+app.use(errorConverter);
+app.use(errorHandler);
 // const initializeRabbitMQ = async () => {
 //   try {
 //     await rabbitMQService.init();
@@ -42,25 +47,21 @@ server = app.listen(config.PORT, () => {
 
 // initializeRabbitMQ();
 
-const exitHandler = () => {
-  if (server) {
-    server.close(() => {
-      console.log("Server closed");
-      process.exit(1);
-    });
-  } else {
-    process.exit(1);
-  }
-}
+// const exitHandler = () => {
+//   if (server) {
+//     server.close(() => {
+//       console.log("Server closed");
+//       process.exit(1);
+//     });
+//   } else {
+//     process.exit(1);
+//   }
+// }
 
-const unexpectedErrorHandler = (error: Error) => {
-  console.error(error);
-  exitHandler();
-}
+// const unexpectedErrorHandler = (error: Error) => {
+//   console.error(error);
+//   exitHandler();
+// }
 
-process.on("uncaughtException", unexpectedErrorHandler);
-process.on("unhandledRejection", unexpectedErrorHandler);
-
-app.get('/hello', (req, res) => {
-  res.send('Hello World');
-})
+// process.on("uncaughtException", unexpectedErrorHandler);
+// process.on("unhandledRejection", unexpectedErrorHandler);

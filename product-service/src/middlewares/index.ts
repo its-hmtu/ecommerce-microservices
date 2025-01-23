@@ -29,7 +29,8 @@ const jwtSecret = config.JWT_SECRET as string;
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    throw new ApiError(401, "Unauthorized! Missing Authorization Header");
+    next(new ApiError(401, "Unauthorized! Missing Authorization Header"));
+    return;
   }
 
   const [, token] = authHeader.split(" ");

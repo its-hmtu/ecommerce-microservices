@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    .email-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      background-color: #007bff;
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 8px 8px 0 0;
+      text-align: center;
+    }
+
+    .content {
+      padding: 20px;
+      color: #333333;
+      line-height: 1.6;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 12px;
+      color: #999999;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>{{subject}}</h1>
+    </div>
+    <div class="content">
+      <p>{{content}}</p>
+    </div>
+    <div class="footer">
+      <p>&copy; {{year}} <span style="font-weight: bold;">Online</span><span style="font-weight: 300;">Boutique</span>. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+
+</html>
