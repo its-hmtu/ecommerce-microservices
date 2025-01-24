@@ -2,8 +2,7 @@ import amqp, { Channel, Connection } from "amqplib";
 import config from "../config";
 import { ICart, Cart } from "../database";
 import { ApiError } from "../utils";
-import { redisCacheService } from "./RedisCacheService";
-
+import RedisService from "./RedisService";
 class RabbitMQService {
   private cartGetRequestQueue = "CART_GET_REQUEST";
   private cartGetResponseQueue = "CART_GET_RESPONSE";
@@ -55,7 +54,7 @@ class RabbitMQService {
 
         await cart.save();
 
-        await redisCacheService.clearCache(userId as string) ;
+        // await redisCacheService.clearCache(userId as string) ;
         
         const message = JSON.stringify(cart);
         this.channel.sendToQueue(this.cartGetResponseQueue, Buffer.from(message));

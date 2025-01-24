@@ -4,7 +4,7 @@ import userRouter from './routes';
 import { errorConverter, errorHandler } from './middlewares';
 import { connectDb } from './database';
 import config from './config';
-import { redisCacheService } from './services/RedisCacheService';
+import { redisCacheService } from './services/RedisService';
 import { rabbitMQService } from './services/RabbitMQService';
 import morgan from 'morgan';
 import winston from 'winston';

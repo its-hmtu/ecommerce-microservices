@@ -27,10 +27,18 @@ class RabbitMQService {
         const { to, subject, text } = JSON.parse(msg.content.toString());
         console.log("Received email request: ", { to, subject });
         await emailService.sendEmail(to, subject, text);
+        this.channel.sendToQueue(
+          this.emailResponse,
+          Buffer.from(
+            JSON.stringify({
+              message: `Email sent to ${to}`,
+            })
+          )
+        );
 
         this.channel.ack(msg);
       }
-    })
+    });
   }
 
   getChannel() {

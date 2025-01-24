@@ -4,6 +4,7 @@ import { IOrder, Order, OrderStatus } from "../database";
 import { ApiError } from "../utils";
 
 class RabbitMQService {
+  private emailResponse = "EMAIL_RESPONSE";
   private orderCreateQueue = "ORDER_CREATED";
   private payemntUpdateQueue = "PAYMENT_UPDATE";
   private updateCartQueue = "CART_UPDATE";
@@ -24,10 +25,22 @@ class RabbitMQService {
     await this.channel.assertQueue(this.payemntUpdateQueue);
     await this.channel.assertQueue(this.updateCartQueue);
     this.listenForPaymentRequests();
+    this.listenForEmailResponse();
   }
 
   getChannel() {
     return this.channel;
+  }
+
+  async listenForEmailResponse() {
+    this.channel.consume(this.emailResponse, async (msg) => {
+      if (msg && msg.content) {
+        const { message } = JSON.parse(msg.content.toString());
+        console.log("Received email response: ", message);
+
+        this.channel.ack(msg);
+      }
+    })
   }
 
   async listenForPaymentRequests() {

@@ -1,9 +1,9 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { IOrder, Order } from "../database";
 import { ApiError } from "../utils";
 import config from "../config";
 import axios from "axios";
-import { redisCacheService } from "../services/RedisCacheService";
+import RedisService from "../services/RedisService";
 import { rabbitMQService } from "../services/RabbitMQService";
 import emailQueue from "../services/EmailQueue";
 
@@ -83,13 +83,13 @@ export const createOrder = async (req: Request, res: Response) => {
   }
 };
 
-export const getOrders = async (req: Request, res: Response) => {
+export const getOrders = async (req: Request, res: Response, next: NextFunction) => {
   const { userId } = req.params;
 
   try {
     const orders = await Order.find({ userId });
     if (!orders || orders.length === 0) {
-      throw new ApiError(404, "No orders found");
+      next(new ApiError(404, "Orders not found"));
     }
 
     res.status(200).json(orders);

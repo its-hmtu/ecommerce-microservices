@@ -14,7 +14,7 @@ export interface IOrder extends Document {
   },
   address: string;
   postal_code: string;
-  totalAmount: number;
+  total_amount: number;
   status: OrderStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -45,7 +45,7 @@ const OrderSchema: Schema = new Schema({
     type: String,
     required: [true, "Postal code must be provided"],
   },
-  totalAmount: {
+  total_amount: {
     type: Number,
     required: [true, "Total amount must be provided"],
   },
