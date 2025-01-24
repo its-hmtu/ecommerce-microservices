@@ -6,8 +6,9 @@ import axios from "axios";
 import RedisService from "../services/RedisService";
 import { rabbitMQService } from "../services/RabbitMQService";
 import emailQueue from "../services/EmailQueue";
+import OrderService from "../services/OrderService";
 
-export const createOrder = async (req: Request, res: Response) => {
+export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
   const {cartId, userId, email, address, postal_code, cardNumber, expiryDate, cvv } = req.body;
   try {
     const channel = rabbitMQService.getChannel();
@@ -87,7 +88,7 @@ export const getOrders = async (req: Request, res: Response, next: NextFunction)
   const { userId } = req.params;
 
   try {
-    const orders = await Order.find({ userId });
+    const orders = await OrderService.getOrders(userId)
     if (!orders || orders.length === 0) {
       next(new ApiError(404, "Orders not found"));
     }

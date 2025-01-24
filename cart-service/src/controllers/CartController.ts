@@ -61,28 +61,31 @@ const updateCart = async (req: Request, res: Response) => {
 
     await CartService.updateUserCart(userId, cart)
 
+    await RedisService.setCache(`${cartCacheKey}:${userId}`, cart, 3600);
+
     res.status(200).json(cart);
   } catch (e: any) {
     res.status(500).json({message: e.message});
   }
 }
 
-const emptyCart = async (req: Request, res: Response) => { 
+const emptyCart = async (req: Request, res: Response, next: NextFunction) => { 
   const { userId } = req.params;
 
   try {
-    const cart = await Cart.findOne({ userId });
+    const cart = await CartService.getUserCart(userId)
     if (!cart) {
-      throw new ApiError(404, "Cart not found");
+      next(new ApiError(404, "Cart not found"))
     }
 
-    cart.items = [];
+    await CartService.updateUserCart(userId, new Cart({
+      userId,
+      items: []
+    }))
 
-    await cart.save();
-
-
+    await RedisService.setCache(`${cartCacheKey}:${userId}`, cart, 3600);
+    
     res.status(200).json(cart);
-
   } catch (e: any) {
     res.status(500).json({message: e.message});
   }

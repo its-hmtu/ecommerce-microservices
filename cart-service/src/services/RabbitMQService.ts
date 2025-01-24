@@ -3,6 +3,7 @@ import config from "../config";
 import { ICart, Cart } from "../database";
 import { ApiError } from "../utils";
 import RedisService from "./RedisService";
+import CartService from "./CartService";
 class RabbitMQService {
   private cartGetRequestQueue = "CART_GET_REQUEST";
   private cartGetResponseQueue = "CART_GET_RESPONSE";
@@ -29,7 +30,7 @@ class RabbitMQService {
       if (msg && msg.content) {
         const { userId } = JSON.parse(msg.content.toString());
         console.log("Received request for cart", userId);
-        const cart = await Cart.findOne({ userId });
+        const cart = await CartService.getUserCart(userId);
         const message = JSON.stringify(cart);
         this.channel.sendToQueue(this.cartGetResponseQueue, Buffer.from(message));
 

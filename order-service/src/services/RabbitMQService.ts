@@ -5,6 +5,8 @@ import { ApiError } from "../utils";
 
 class RabbitMQService {
   private emailResponse = "EMAIL_RESPONSE";
+  private cartGetResponseQueue = "CART_GET_RESPONSE";
+  private cartGetRequestQueue = "CART_GET_REQUEST";
   private orderCreateQueue = "ORDER_CREATED";
   private payemntUpdateQueue = "PAYMENT_UPDATE";
   private updateCartQueue = "CART_UPDATE";
@@ -71,6 +73,20 @@ class RabbitMQService {
         this.channel.ack(msg);
       }
     });
+  }
+
+  async sendCartGetRequest(userId: string) {
+    this.channel.sendToQueue(this.cartGetRequestQueue, Buffer.from(JSON.stringify({ userId })));
+  }
+
+  async getCartGetResponse() {
+    return new Promise((resolve) => {
+      this.channel.consume(this.cartGetResponseQueue, (msg) => {
+        if (msg && msg.content) {
+          const cart = JSON.parse(msg.content.toString())
+        }
+      })
+    })
   }
 }
 
