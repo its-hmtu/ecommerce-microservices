@@ -4,6 +4,7 @@ const PATHS = {
   LOGIN: '/login',
   REGISTER: '/register',
   FORGOT_PASS: '/forgot-password',
+  CART: '/cart',
   NOT_FOUND: '*'
 }
 

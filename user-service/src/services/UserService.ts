@@ -10,7 +10,7 @@ class UserService {
   cookieOptions = {
     expires: this.experation,
     secure: false,
-    httpOnly: true,
+    httpOnly: false,
   };
 
   async createUser(user: IUser): Promise<IUser> {

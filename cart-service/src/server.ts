@@ -4,7 +4,7 @@ import userRouter from './routes';
 import { errorConverter, errorHandler } from './middlewares';
 import { connectDb } from './database';
 import config from './config';
-import { redisCacheService } from './services/RedisService';
+import RedisService from './services/RedisService';
 import { rabbitMQService } from './services/RabbitMQService';
 import morgan from 'morgan';
 import winston from 'winston';
@@ -12,26 +12,19 @@ require('winston-logstash');
 
 const app:Express = express();
 let server:Server;
-const logger = winston.createLogger({
-  transports: [
-    new winston.transports.Console()
-  ]
-})
 
-const morganLogger = morgan('dev');
-
+const logger = morgan('dev')
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(userRouter);
 app.use(errorConverter);
 app.use(errorHandler);
-app.use(morganLogger);
+app.use(logger);
 
 connectDb();
 
 server = app.listen(config.PORT, () => {
-  // console.log(`Server is running on port ${config.PORT}`);
-  logger.info(`Server is running on port ${config.PORT}`);
+  console.log(`Server is running on port ${config.PORT}`);
 })
 
 const initializeRabbitMQ = async () => {
@@ -45,15 +38,15 @@ const initializeRabbitMQ = async () => {
 
 initializeRabbitMQ();
 
-const initializeRedis = async () => {
-  try {
-    await redisCacheService.init();
-  } catch (e) {
-    console.error("Error initializing Redis client: ", e);
-  }
-}
+// const initializeRedis = async () => {
+//   try {
+//     await redisCacheService.init();
+//   } catch (e) {
+//     console.error("Error initializing Redis client: ", e);
+//   }
+// }
 
-initializeRedis();
+// initializeRedis();
 
 const exitHandler = () => {
   if (server) {

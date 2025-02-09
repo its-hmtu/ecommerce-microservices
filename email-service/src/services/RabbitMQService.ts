@@ -1,6 +1,7 @@
 import amqp, { Channel, Connection } from "amqplib";
 import config from "../config";
 import { emailService } from "./EmailService";
+import emailQueue from "./EmailQueue";
 
 class RabbitMQService {
   private emailRequest = "EMAIL_REQUEST";
@@ -26,7 +27,9 @@ class RabbitMQService {
       if (msg && msg.content) {
         const { to, subject, text } = JSON.parse(msg.content.toString());
         console.log("Received email request: ", { to, subject });
-        await emailService.sendEmail(to, subject, text);
+
+        await emailQueue.add({ to, subject, text});
+
         this.channel.sendToQueue(
           this.emailResponse,
           Buffer.from(

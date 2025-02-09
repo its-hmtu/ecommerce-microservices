@@ -10,7 +10,7 @@ function MainLayout() {
         <Header isMobile={true} />
       </Layout.Header>
       <Layout.Content>
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-4 pb-16">
           <Outlet />
         </div>
       </Layout.Content>

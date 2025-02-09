@@ -2,19 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 import productService from "../../features/services/product.service";
 import { Card, Empty } from "antd";
-import ProductCard from "./components/ProductCard";
+import ProductCard from "../../components/ProductCard";
 import { toast } from "react-toastify";
-type ProductCardTypes = {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-};
+import { ProductCardTypes } from "../../types";
 
 function HomePage() {
-  const { data, isError, isPending } = useQuery({
-    queryKey: ["user"],
+  const { data, isError, isLoading } = useQuery({
+    queryKey: ["products"],
     queryFn: productService.getProducts,
   });
 
@@ -24,16 +18,12 @@ function HomePage() {
     }
   }, [isError]);
 
-  // if (isError) {
-  //   return <div>Error</div>;
-  // }
-
   return (
     <div className="w-full">
       <h1 className="text-2xl font-bold mb-4">Hot Products</h1>
-      <a href="http://192.168.100.245/secured">Click me!</a>
-      <div className="flex flex-wrap xl:gap-4 sm:gap-3">
-        {isPending || !data ? (
+      {/* <div className="flex flex-wrap xl:gap-4 sm:gap-3"> */}
+      <div className="grid grid-cols-5 gap-4">
+        {isLoading || !data ? (
           Array.from({ length: 10 }).map((_, index) => (
             <Card
               key={index}
@@ -58,7 +48,7 @@ function HomePage() {
                 description={description}
                 price={price}
                 image={image}
-                loading={isPending}
+                loading={isLoading}
               />
             )
           )

@@ -5,6 +5,9 @@ import { ApiError, encryptPassword, isPasswordMatch } from "../utils";
 import config from "../config";
 import { validationResult } from "express-validator";
 import UserService from "../services/UserService";
+import RedisService from "../services/RedisService";
+
+const userCacheKey = "user";
 
 const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -68,6 +71,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
     const token = await UserService.createToken(user, res);
 
+    await RedisService.setCache(`${userCacheKey}:${user._id}`, user, 3600);
+
     res.status(200).json({
       message: "User logged in successfully",
       token,
@@ -89,6 +94,16 @@ const getUserDetails = async (
 ) => {
   try {
     const { id } = req.params;
+    const cacheUser = await RedisService.getCache(`${userCacheKey}:${id}`);
+    if (cacheUser) {
+      console.log("Cache hit");
+      res.status(200).json({
+        message: "User details",
+        user: cacheUser,
+      });
+      return;
+    }
+
     const user = await UserService.getUserById(id);
 
     if (!user) {
@@ -105,8 +120,25 @@ const getUserDetails = async (
   }
 };
 
+const logout = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    await RedisService.clearCache(`${userCacheKey}:${id}`);
+
+    // clear cookie
+    res.clearCookie("jwt");
+
+    res.status(200).json({
+      message: "User logged out successfully",
+    });
+  } catch (e: any) {
+    next(new ApiError(500, e.message));
+  }
+}
+
 export default {
   register,
   login,
   getUserDetails,
+  logout,
 };

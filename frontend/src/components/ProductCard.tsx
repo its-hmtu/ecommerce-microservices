@@ -55,8 +55,20 @@ function ProductCard({
   };
 
   return (
-    <Card hoverable loading={loading}>
-      <div onClick={() => navigate(`/products/${_id}`)}>
+    <Card
+      hoverable
+      loading={loading}
+      style={{
+        maxWidth: "275px",
+      }}
+    >
+      <div
+        onClick={() => navigate(`/products/${_id}`)}
+        className="flex flex-col"
+        style={{
+          height: "300px",
+        }}
+      >
         <img
           src={image}
           alt={name}
@@ -65,18 +77,23 @@ function ProductCard({
             height: "200px",
             objectFit: "fill",
             marginBottom: 10,
+            margin: "auto",
           }}
         />
-        <Card.Meta title={name} description={description} />
-
-        <span className="font-bold text-lg mt-2 block">${price}</span>
+        <Card.Meta 
+          title={name} 
+          // description={description} 
+        />
       </div>
-      <Button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full absolute bottom-5 right-2"
-        onClick={handleAddToCart}
-      >
-        Add to Cart
-      </Button>
+      <div className="flex justify-between items-center mt-4">
+        <span className="font-bold text-lg mt-2 block">${price}</span>
+        <Button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+          onClick={() => navigate(`/products/${_id}`)}
+        >
+          Details
+        </Button>
+      </div>
     </Card>
   );
 }

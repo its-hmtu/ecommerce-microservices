@@ -3,3 +3,5 @@ export const API_URL_GET_USER = '/auth/user'
 export const API_URL_REGISTER = '/auth/register'
 
 export const API_URL_GET_PRODUCTS = '/products'
+
+export const API_URL_GET_USER_CART = '/cart'

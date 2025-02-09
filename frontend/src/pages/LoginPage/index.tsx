@@ -1,8 +1,11 @@
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import routes from "../../constants/paths";
 import { toast } from "react-toastify";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import userService from "../../features/services/user.service";
+import useUser from "../../hooks/useUser";
 
 type FieldTypes = {
   email: string;
@@ -12,10 +15,48 @@ type FieldTypes = {
 
 function LoginPage() {
   const [isLoggingIn, setLoggingIn] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useUser()
+  const { mutate, isPending, data } = useMutation({
+    mutationFn: userService.login
+  })
+  //  const {data: cart, isLoading: isLoadingCart} = useQuery({
+  //     queryKey: ["cart"],
+  //     queryFn: () => userService.getUserCart(user?.id),
+  //   })
 
   const handleLogin = async (values: FieldTypes) => {
-    
+    try {
+      setLoggingIn(true);
+      await mutate(values, {
+        onSuccess: async (data) => {
+          if (data.status === 200) {
+            const {data: cartData} = await userService.getUserCart(data.data.user.id)
+            if (cartData) {
+              const {cart, totalItems} = cartData
+
+              await login({
+                ...data.data.user,
+                cart: cart.items,
+                cartTotal: totalItems
+              }) 
+            } else {
+              await login(data.data.user)
+            }
+            // await login()
+            navigate(routes.PATHS.HOME)
+            // console.log(cartData)
+          }
+        }
+      });
+      message.success("Login successful");
+    } catch (error) {
+      toast.error("Error while logging in");
+    } finally {
+      setLoggingIn(false);
+    }
   };
+
 
   return (
     <div>
@@ -33,7 +74,7 @@ function LoginPage() {
             type="email"
             className="w-full border rounded"
             placeholder="Email"
-            disabled={isLoggingIn}
+            disabled={isPending}
           />
         </Form.Item>
         <Form.Item<FieldTypes>
@@ -44,7 +85,7 @@ function LoginPage() {
             type="password"
             className="w-full border rounded"
             placeholder="Password"
-            disabled={isLoggingIn}
+            disabled={isPending}
           />
         </Form.Item>
         <Form.Item<FieldTypes>
@@ -59,6 +100,7 @@ function LoginPage() {
           htmlType="submit"
           className="w-full rounded-full font-bold "
           loading={isLoggingIn}
+          disabled={isPending}
         >
           Sign in
         </Button>

@@ -10,9 +10,9 @@ const emailQueue = new Bull("email-queue", {
 });
 
 emailQueue.process(async (job) => {
-  const { to, subject, text, html } = job.data;
+  const { to, subject, text } = job.data;
   console.log("Received email request: ", { to, subject });
-  await emailService.sendEmail(to, subject, text, html);
+  await emailService.sendEmail(to, subject, text );
 });
 
 emailQueue.on("completed", (job) => {

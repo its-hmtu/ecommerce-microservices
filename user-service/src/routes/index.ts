@@ -19,5 +19,5 @@ const validateLogin = [
 userRouter.post('/register', validateRegister, AuthController.register);
 userRouter.post('/login', validateLogin, AuthController.login);
 userRouter.get('/users/:id', AuthController.getUserDetails);
-
+userRouter.post('/logout', AuthController.logout)
 export default userRouter;

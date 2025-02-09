@@ -44,11 +44,16 @@ app.use(
 );
 app.use(logger);
 
-app.use("/api/auth", createProxyMiddleware("user-service"));
-app.use("/api/products", createProxyMiddleware("product-service"));
-app.use("/api/cart", createProxyMiddleware("cart-service"));
-app.use("/api/orders", createProxyMiddleware("order-service"));
-app.use("/api/payment", createProxyMiddleware("payment-service"));
+// app.use("/api/auth", createProxyMiddleware("user-service"));
+// app.use("/api/products", createProxyMiddleware("product-service"));
+// app.use("/api/cart", createProxyMiddleware("cart-service"));
+// app.use("/api/orders", createProxyMiddleware("order-service"));
+// app.use("/api/payment", createProxyMiddleware("payment-service"));
+app.use("/api/auth", proxy("http://localhost:8081"));
+app.use("/api/products", proxy("http://localhost:8082"));
+app.use("/api/cart", proxy("http://localhost:8083"));
+app.use("/api/orders", proxy("http://localhost:8085"));
+app.use("/api/payment", proxy("http://localhost:8086"));
 
 app.get("/health", (req, res) => {
   res.status(200).json({
